@@ -15,21 +15,27 @@ jobs:
       - name: Checkout firmware
         uses: actions/checkout@v4
 
-      - name: Clone dependencies
-        run: |
-          git clone https://github.com/${{ github.repository_owner }}/dependencies.git \
-            "${{ github.workspace }}/../dependencies"
+      - name: Checkout dependencies
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/dependencies
+          path: _deps
+
+      # CMakeLists.txt expects dependencies to be at ../dependencies relative to
+      # the firmware repo (sibling directory). Create a symlink to match that layout.
+      - name: Symlink dependencies to expected path
+        run: ln -s "${GITHUB_WORKSPACE}/_deps" "${GITHUB_WORKSPACE}/../dependencies"
 
       - name: Cache RISC-V toolchain
         id: cache-toolchain
         uses: actions/cache@v4
         with:
-          path: ${{ github.workspace }}/../dependencies/tools/risc/xpack-riscv-none-elf-gcc-${{ env.XPACK_VERSION }}
+          path: ${{ github.workspace }}/_deps/tools/risc/xpack-riscv-none-elf-gcc-${{ env.XPACK_VERSION }}
           key: riscv-toolchain-${{ env.XPACK_VERSION }}-linux-x64
 
       - name: Install RISC-V toolchain
         if: steps.cache-toolchain.outputs.cache-hit != 'true'
-        run: bash "${{ github.workspace }}/../dependencies/tools/risc/install-toolchain.sh"
+        run: bash "${GITHUB_WORKSPACE}/_deps/tools/risc/install-toolchain.sh"
 
       - name: Configure CMake
         run: |
