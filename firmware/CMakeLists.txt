@@ -43,14 +43,15 @@ function(add_esc_bootloader_target current variant mcu_prefix)
             main.c
             bootloader.c
             bootloader.h
-            ch32v20x_conf.h
-            ch32v20x_it.h
-            ch32v20x_it.c
+            wch/ch32v20x_conf.h
+            wch/ch32v20x_it.h
+            wch/ch32v20x_it.c
     )
 
     target_include_directories(${target_name}
         PRIVATE
             ${CMAKE_CURRENT_SOURCE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/wch
             ${CMAKE_CURRENT_SOURCE_DIR}/../../dependencies/common
     )
 
