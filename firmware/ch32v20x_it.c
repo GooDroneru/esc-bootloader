@@ -13,6 +13,7 @@
 
 void NMI_Handler(void) __attribute__((interrupt("machine")));
 void HardFault_Handler(void) __attribute__((interrupt("machine")));
+void SW_Handler(void) __attribute__((interrupt("machine")));
 
 /*********************************************************************
  * @fn      NMI_Handler
@@ -37,6 +38,21 @@ void HardFault_Handler(void)
   while (1)
   {
   }
+}
+
+/*********************************************************************
+ * @fn      SW_Handler
+ *
+ * @brief   Software interrupt handler — jumps to main application.
+ *
+ * @return  none
+ */
+void SW_Handler(void)
+{
+    __asm("la  a6, _firmware_start_addr");
+    __asm("jr  a6");
+
+    while(1);
 }
 
 
