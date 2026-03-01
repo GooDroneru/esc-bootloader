@@ -20,6 +20,18 @@ jobs:
         with:
           repository: ${{ github.repository_owner }}/dependencies
           path: _deps
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Debug workspace layout
+        run: |
+          echo "=== GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          ls -la "${GITHUB_WORKSPACE}/"
+          echo "=== _deps:"
+          ls -la "${GITHUB_WORKSPACE}/_deps/" || echo "_deps not found!"
+          echo "=== _deps/tools:"
+          ls -la "${GITHUB_WORKSPACE}/_deps/tools/" || echo "_deps/tools not found!"
+          echo "=== _deps/tools/risc:"
+          ls -la "${GITHUB_WORKSPACE}/_deps/tools/risc/" || echo "_deps/tools/risc not found!"
 
       # CMakeLists.txt expects dependencies to be at ../dependencies relative to
       # the firmware repo (sibling directory). Create a symlink to match that layout.
