@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+env:
+  XPACK_VERSION: "15.2.0-1"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout firmware
+        uses: actions/checkout@v4
+
+      - name: Clone dependencies
+        run: |
+          git clone https://github.com/${{ github.repository_owner }}/dependencies.git \
+            "${{ github.workspace }}/../dependencies"
+
+      - name: Cache RISC-V toolchain
+        id: cache-toolchain
+        uses: actions/cache@v4
+        with:
+          path: ${{ github.workspace }}/../dependencies/tools/risc/xpack-riscv-none-elf-gcc-${{ env.XPACK_VERSION }}
+          key: riscv-toolchain-${{ env.XPACK_VERSION }}-linux-x64
+
+      - name: Install RISC-V toolchain
+        if: steps.cache-toolchain.outputs.cache-hit != 'true'
+        run: bash "${{ github.workspace }}/../dependencies/tools/risc/install-toolchain.sh"
+
+      - name: Configure CMake
+        run: |
+          cmake -S firmware -B firmware/build \
+            -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build firmware/build --parallel $(nproc)
+
+      - name: Upload firmware artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ github.sha }}
+          path: |
+            firmware/build/*.hex
+            firmware/build/*.bin
+          if-no-files-found: error
